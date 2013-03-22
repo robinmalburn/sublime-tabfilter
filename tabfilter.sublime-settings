@@ -1,0 +1,7 @@
+{
+	/**
+	 * Should the full path be listed.  If false, only the filename is shown
+	 * @param boolean
+	 */
+	"show_full_path" : false
+}
