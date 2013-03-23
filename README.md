@@ -32,7 +32,7 @@ Download the repository as a zip file and extract the sublime-tabfilter-master f
 
 ##### Windows
 
-	I don't currently run Windows, so not sure where the packages live on that platform.  The plugin will work on Windows, though, so if anyone wants to contribute the directories that apply to Windows XP, Vista, 7, or 8, please feel free.
+I don't currently run Windows, so not sure where the packages live on that platform.  The plugin will work on Windows, though, so if anyone wants to contribute the directories that apply to Windows XP, Vista, 7, or 8, please feel free.
 
 
 ### Package Control
