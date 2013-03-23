@@ -1,6 +1,5 @@
 [
 	{
-		"id": "tab_filter",
 		"caption": "Tab Filter",
 		"command": "tab_filter"
 	}

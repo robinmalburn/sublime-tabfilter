@@ -1,6 +1,6 @@
 # Tab Filter
 
-Tab Filter is a simple sublime plugin to filter the open tabs in the current window, allowing for quicker switching amongst existing tabs.
+Tab Filter is a Sublime Text 2 plugin to filter the open tabs in the current window, allowing for quicker switching amongst existing tabs.
 
 ## Installation
 
@@ -39,7 +39,21 @@ I don't currently run Windows, so not sure where the packages live on that platf
 
 [Package Control](http://wbond.net/sublime\_packages/package\_control) support coming soon!  Hopefully...
 
+## Usage
 
+### Key Bindings
+
+Tab Filter comes with the following default keymap for Linux, OSX and Windows:  `alt+shift+p`
+
+This can be overriden via the keybindings options in `Preferences > Package Settings > Tab Filter > Key Bindings - User` 
+
+### Command Palette
+
+Tab Filter can also be activated via the Command Palette (brought up using `ctrl+shift+p`) and typing Tab Filter
+
+### Settings
+
+Tab Filter can be configured to show full paths instead of just filenames via the `show_full_path` setting, which can be customised via `Preferences > Package Settings > Tab Filter > Settings - User` 
 
 ## License
 

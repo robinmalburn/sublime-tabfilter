@@ -20,6 +20,9 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		for view in views:
 			if view.file_name() is None:
 				name = view.name()
+				#set the view name to untitled if we get an empty name
+				if len(name) == 0:
+					name = "untitled"
 			else:
 				if get_setting("show_full_path") is True:
 					name = view.file_name()
