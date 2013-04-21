@@ -17,7 +17,7 @@
 			[
 				{
 					"command" : "open_file",
-					"args" : { "file" : "${packages}/tabfilter/tabfilter.sublime-settings"},
+					"args" : { "file" : "${packages}/Tab Filter/tabfilter.sublime-settings"},
 					"caption" : "Settings - Default"
 				},
 				{
@@ -32,7 +32,7 @@
 					"command": "open_file",
 					"args": 
 						{ 
-							"file": "${packages}/tabfilter/Default (OSX).sublime-keymap",
+							"file": "${packages}/Tab Filter/Default (OSX).sublime-keymap",
 							"platform": "OSX"
 						},
 					"caption": "Key Bindings – Default"
@@ -41,7 +41,7 @@
 					"command": "open_file",
 					"args": 
 						{
-							"file": "${packages}/tabfilter/Default (Linux).sublime-keymap",
+							"file": "${packages}/Tab Filter/Default (Linux).sublime-keymap",
 							"platform": "Linux"
 						},
 					"caption": "Key Bindings – Default"
@@ -50,7 +50,7 @@
 					"command": "open_file",
 					"args": 
 					{
-						"file": "${packages}/tabfilter/Default (Windows).sublime-keymap",
+						"file": "${packages}/Tab Filter/Default (Windows).sublime-keymap",
 						"platform": "Windows"
 					},
 					"caption": "Key Bindings – Default"
