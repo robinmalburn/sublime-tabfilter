@@ -1,6 +1,6 @@
 # Tab Filter
 
-Tab Filter is a Sublime Text 2 plugin to filter the open tabs in the current window, allowing for quicker switching amongst existing tabs.
+Tab Filter is a Sublime Text 2 plugin for quickly switching between open tabs.  Invoking Tab Filter brings up a "GoTo Anything"-like quick input showing your opened tabs for the current window, allowing you to quick filter on file names to rapidly switch amongst existing tabs.
 
 ## Installation
 
@@ -11,24 +11,24 @@ Tab Filter is a Sublime Text 2 plugin to filter the open tabs in the current win
 Using git:
 
     $ cd ~/.config/sublime-text-2/Packages/
-    $ git clone git://github.com/robinmalburn/sublime-tabfilter.git tabfilter
+    $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
 
 Without git:
 
 Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/.config/sublime-text-2/Packages/tabfilter`
+	`~/.config/sublime-text-2/Packages/Tab Filter`
 
 ##### OSX:
 
 Using git:
 
 	$ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
-    $ git clone git://github.com/robinmalburn/sublime-tabfilter.git tabfilter
+    $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
 
 Without git:
 
 Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/Library/Application\ Support/Sublime\ Text\ 2/Packages/tabfilter`
+	`~/Library/Application\ Support/Sublime\ Text\ 2/Packages/Tab Filter`
 
 ##### Windows
 
