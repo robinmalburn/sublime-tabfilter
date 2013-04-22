@@ -1,6 +1,11 @@
 # Tab Filter
 
-Tab Filter is a Sublime Text 2 plugin for quickly switching between open tabs.  Invoking Tab Filter brings up a "GoTo Anything"-like quick input showing your opened tabs for the current window, allowing you to quick filter on file names to rapidly switch amongst existing tabs.
+Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  Invoking Tab Filter brings up a "GoTo Anything"-like quick input showing your opened tabs for the current window, allowing you to quick filter on file names to rapidly switch amongst existing tabs.
+
+## Compatibility
+
+This plugin is compatible with Sublime Text 2 and 3.
+
 
 ## Installation
 
