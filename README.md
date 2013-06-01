@@ -4,7 +4,9 @@ Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  In
 
 ## Compatibility
 
-This plugin is compatible with Sublime Text 2 and 3.
+This plugin is compatible with Sublime Text 2 and 3<sup>*</sup>.
+
+**<sup>*</sup>** Sublime Text 3 is still in beta at the moment, so there could be changes whilst it's in development that could break this plugin's compatability in the future.  If you stumble across any problems, please do raise an [issue](https://github.com/robinmalburn/sublime-tabfilter/issues)
 
 
 ## Installation
@@ -42,7 +44,8 @@ I don't currently run Windows, so not sure where the packages live on that platf
 
 ### Package Control
 
-[Package Control](http://wbond.net/sublime\_packages/package\_control) support coming soon!  Hopefully...
+Tab Filter is also available through [Package Control](http://wbond.net/sublime\_packages/package\_control).  To install, bring up the Command Palette (brought up using `ctrl+shift+p` on Linux / Windows or `cmd+shift+p` on OS X) and run the `Package Control: Install Package` command - now search for and select **Tab Filter**.
+
 
 ## Usage
 
@@ -54,7 +57,7 @@ This can be overriden via the keybindings options in `Preferences > Package Sett
 
 ### Command Palette
 
-Tab Filter can also be activated via the Command Palette (brought up using `ctrl+shift+p`) and typing Tab Filter
+Tab Filter can also be activated via the Command Palette (brought up using `ctrl+shift+p` on Linux / Windows or `cmd+shift+p` on OS X) and typing Tab Filter
 
 ### Settings
 
@@ -62,4 +65,4 @@ Tab Filter can be configured to show full paths instead of just filenames via th
 
 ## License
 
-Released under MIT license.
+Released under [MIT license](https://github.com/robinmalburn/sublime-tabfilter/blob/master/license.txt).

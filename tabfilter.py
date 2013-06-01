@@ -29,16 +29,6 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 				else: 
 					name = os.path.basename(view.file_name())
 
-			# check if this name is already in use, and if so, try to append 
-			if get_setting("show_full_path") is False:
-				for entry in self.name_list:
-					if entry[0] == name:
-						index = self.name_list.index(entry)
-						if self.view_list[index].file_name() is not None:
-							self.name_list[index][0] = self.view_list[index].file_name()
-						if view.file_name() is not None:
-							name = view.file_name()
-
 			captions = []
 
 			if window.get_view_index(active_view) == window.get_view_index(view):
@@ -57,8 +47,24 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 			self.view_list.append(view)
 			self.name_list.append([name, caption])
 
+		# if we're not showing the full path for all entries, check for any duplicate file names, 
+		# and convert those to be full paths
+		if get_setting("show_full_path") is False:
+			duplicates = filter(self._duplicates, self.name_list)
+			for index, entry in enumerate(self.name_list):
+				if entry in duplicates and self.view_list[index].file_name() is not None:
+					self.name_list[index][0] = self.view_list[index].file_name()
+
 		window.show_quick_panel(self.name_list, self._on_done)
 
 	def _on_done(self,index):
 		if index > - 1:
 			sublime.active_window().focus_view(self.view_list[index])
+
+	def _duplicates(self, item):
+		dupes = 0;
+		for entry in self.name_list:
+			if item[0] == entry[0]:
+				dupes += 1;
+
+		return dupes > 1
