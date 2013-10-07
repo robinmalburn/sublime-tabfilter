@@ -11,6 +11,10 @@ This plugin is compatible with Sublime Text 2 and 3<sup>*</sup>.
 
 ## Installation
 
+### Package Control
+
+Tab Filter is also available through [Package Control](http://wbond.net/sublime\_packages/package\_control).  To install, bring up the Command Palette (brought up using `ctrl+shift+p` on Linux / Windows or `cmd+shift+p` on OS X) and run the `Package Control: Install Package` command - now search for and select **Tab Filter**.
+
 ### Manual
 
 ##### Linux
@@ -42,11 +46,6 @@ Download the repository as a zip file and extract the sublime-tabfilter-master f
 I don't currently run Windows, so not sure where the packages live on that platform.  The plugin will work on Windows, though, so if anyone wants to contribute the directories that apply to Windows XP, Vista, 7, or 8, please feel free.
 
 
-### Package Control
-
-Tab Filter is also available through [Package Control](http://wbond.net/sublime\_packages/package\_control).  To install, bring up the Command Palette (brought up using `ctrl+shift+p` on Linux / Windows or `cmd+shift+p` on OS X) and run the `Package Control: Install Package` command - now search for and select **Tab Filter**.
-
-
 ## Usage
 
 ### Key Bindings
@@ -61,7 +60,7 @@ Tab Filter can also be activated via the Command Palette (brought up using `ctrl
 
 ### Settings
 
-Tab Filter can be configured to show full paths instead of just filenames via the `show_full_path` setting, which can be customised via `Preferences > Package Settings > Tab Filter > Settings - User` 
+Tab Filter can be configured to show or hide additional captions relating to the state of each open tab.  The captions include: `Current File`, `Unsaved File`, `Unsaved Changes` and `Read Only`.  These additional captions default to being shown, but can be hidden via `Preferences > Package Settings > Tab Filter > Settings - User` 
 
 ## License
 
