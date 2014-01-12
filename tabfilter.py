@@ -48,7 +48,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 				caption_list.append(caption)
 
 		self.prefix = os.path.commonprefix(dir_list)
-		tabs = map(self._common_names, name_list, caption_list)
+		tabs = list(map(self._common_names, name_list, caption_list)) #wrap the result of our map function as a list for Python 3.x support
 		window.show_quick_panel(tabs, self._on_done)
 
 	def _on_done(self,index):
