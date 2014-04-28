@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Robin Malburn
+# Copyright (c) 2013, 2014 Robin Malburn
 # See the file license.txt for copying permission.
 
 import sublime
@@ -6,17 +6,21 @@ import sublime_plugin
 import os
 
 class TabFilterCommand(sublime_plugin.WindowCommand):
+	"""Provides a GoToAnything style interface for searching and selecting open tabs"""
+
 	def run(self):
+		"""Shows a quick panel to filter and select tabs from the active window"""
+		
 		window = sublime.active_window()
-		name_list = []
-		caption_list = []
-		dir_list = []
-		self.view_list = []
+		names = []
+		captions = []
+		dirs = []
+		self.views = []
 		self.prefix = ""
 		self.settings = sublime.load_settings("tabfilter.sublime-settings")
 
 		for view in window.views():
-			self.view_list.append(view)
+			self.views.append(view)
 
 			if view.file_name() is None:
 				name = view.name()
@@ -25,38 +29,38 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 					name = "untitled"
 			else:
 				name = view.file_name()
-				dir_list.append(os.path.dirname(view.file_name())+os.path.sep)
+				dirs.append(os.path.dirname(view.file_name())+os.path.sep)
 
-			name_list.append(name)
+			names.append(name)
 
 			if self.settings.get("show_captions", True):
-				captions = []
+				view_captions = []
 
 				if window.get_view_index(window.active_view()) == window.get_view_index(view):
-					captions.append("Current File")
+					view_captions.append("Current File")
 
 				if view.file_name() is None:
-					captions.append("Unsaved File")
+					view_captions.append("Unsaved File")
 				elif view.is_dirty():
-					captions.append("Unsaved Changes")
+					view_captions.append("Unsaved Changes")
 
 				if view.is_read_only():
 					caption.append("Read Only")
 
-				caption = ", ".join(captions)
+				caption = ", ".join(view_captions)
 				
-				caption_list.append(caption)
+				captions.append(caption)
 
-		self.prefix = os.path.commonprefix(dir_list)
-		tabs = list(map(self._common_names, name_list, caption_list)) #wrap the result of our map function as a list for Python 3.x support
+		self.prefix = os.path.commonprefix(dirs)
+
+		if self.settings.get("show_captions", True):
+			tabs = [[os.path.basename(path), path.replace(self.prefix, ''), caption] for path, caption in zip(names, captions)]
+		else:
+			tabs = [[os.path.basename(path), path.replace(self.prefix, '')] for path in names]
+
 		window.show_quick_panel(tabs, self._on_done)
 
 	def _on_done(self,index):
+		"""Callback handler to move focus to the selected tab index"""
 		if index > - 1:
-			sublime.active_window().focus_view(self.view_list[index])
-
-	def _common_names(self, path, caption):
-		if self.settings.get("show_captions", True):
-			return [os.path.basename(path), path.replace(self.prefix, ''), caption]
-		else:
-			return [os.path.basename(path), path.replace(self.prefix, '')]
+			sublime.active_window().focus_view(self.views[index])
