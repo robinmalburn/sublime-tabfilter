@@ -45,7 +45,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 					view_captions.append("Unsaved Changes")
 
 				if view.is_read_only():
-					caption.append("Read Only")
+					view_captions.append("Read Only")
 
 				caption = ", ".join(view_captions)
 				
