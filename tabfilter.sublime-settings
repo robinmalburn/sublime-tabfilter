@@ -3,5 +3,10 @@
 	 * Show additonal captions, e.g. "Current File", "Unsaved Changes", etc
 	 * @param boolean
 	 */
-	"show_captions" : true
+	"show_captions" : true,
+	/**
+	 * Include path along with filename when displaying quick panel.
+	 * @param boolean
+	 */
+	"include_path" : false
 }

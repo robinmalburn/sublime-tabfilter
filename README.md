@@ -57,7 +57,15 @@ Tab Filter can also be activated via the Command Palette (brought up using `ctrl
 
 ### Settings
 
-Tab Filter can be configured to show or hide additional captions relating to the state of each open tab.  The captions include: `Current File`, `Unsaved File`, `Unsaved Changes` and `Read Only`.  These additional captions default to being shown, but can be hidden via `Preferences > Package Settings > Tab Filter > Settings - User` 
+Additional configuration settins for Tab Filter can be altered via `Preferences > Package Settings > Tab Filter > Settings - User` 
+
+##### Captions
+
+Tab Filter can be configured to show or hide additional captions relating to the state of each open tab.  The captions include: *Current File*, *Unsaved File*, *Unsaved Changes* and *Read Only*.  Captions are shown by default, but this behaviour can be changed by setting the `show_captions` setting to `false`.
+
+##### Path/Filename Filtering
+
+By default, Tab Filter only shows the basename of open tabs (where they're really files and not just buffers, of course).  This configuration can be changed to instead show and therefore allow filtering by the full, non-common path of the file instead by changing the `include_path` option to `true`.
 
 ## License
 

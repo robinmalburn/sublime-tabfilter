@@ -1,9 +1,15 @@
-# Copyright (c) 2013, 2014 Robin Malburn
+# Copyright (c) 2013 - 2016 Robin Malburn
 # See the file license.txt for copying permission.
 
 import sublime
 import sublime_plugin
 import os
+try:
+	#Python 3 / ST3 relative import within package.
+	from . import tab
+except ValueError:
+	#Python 2 / ST2 fallback for relative import.
+	import tab
 
 class TabFilterCommand(sublime_plugin.WindowCommand):
 	"""Provides a GoToAnything style interface for searching and selecting open tabs"""
@@ -11,56 +17,60 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		"""Shows a quick panel to filter and select tabs from the active window"""
 		
-		window = sublime.active_window()
-		names = []
-		captions = []
-		dirs = []
+		tabs = []
+		self.window = sublime.active_window()
 		self.views = []
 		self.prefix = ""
 		self.settings = sublime.load_settings("tabfilter.sublime-settings")
 
-		for view in window.views():
+		for view in self.window.views():
 			self.views.append(view)
+			tabs.append(self.make_tab(view))
 
-			if view.file_name() is None:
-				name = view.name()
-				#set the view name to untitled if we get an empty name
-				if len(name) == 0:
-					name = "untitled"
-			else:
-				name = view.file_name()
-				dirs.append(os.path.dirname(view.file_name())+os.path.sep)
+		self.prefix = len(os.path.commonprefix([entity.name for entity in tabs if entity.is_file]))
 
-			names.append(name)
+		show_captions = self.settings.get("show_captions", True)
+		include_path = self.settings.get("include_path", False)
 
-			if self.settings.get("show_captions", True):
-				view_captions = []
+		tabs = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
 
-				if window.get_view_index(window.active_view()) == window.get_view_index(view):
-					view_captions.append("Current File")
+		self.window.show_quick_panel(tabs, self._on_done)
 
-				if view.file_name() is None:
-					view_captions.append("Unsaved File")
-				elif view.is_dirty():
-					view_captions.append("Unsaved Changes")
+	def make_tab(self, view):
+		"""Makes a new Tab entity relating to the given view.
+		Args:
+			view (sublime.View): Sublime View to build the Tab from
+		Returns (Tab): Tab entity containing metadata about the view.
 
-				if view.is_read_only():
-					view_captions.append("Read Only")
+		"""
+		name = view.file_name()
+		is_file = True
 
-				caption = ", ".join(view_captions)
-				
-				captions.append(caption)
+		#If the name is not set, then we're dealing with a buffer
+		#rather than a file, so deal with it accordingly.
+		if name is None:
+			is_file = False
+			name = view.name()
+			#set the view name to untitled if we get an empty name
+			if len(name) == 0:
+				name = "untitled"
 
-		self.prefix = os.path.commonprefix(dirs)
+		entity = tab.Tab(name, is_file)
 
-		if self.settings.get("show_captions", True):
-			tabs = [[os.path.basename(path), path.replace(self.prefix, ''), caption] for path, caption in zip(names, captions)]
-		else:
-			tabs = [[os.path.basename(path), path.replace(self.prefix, '')] for path in names]
+		if self.window.get_view_index(self.window.active_view()) == self.window.get_view_index(view):
+			entity.add_caption("Current File")
 
-		window.show_quick_panel(tabs, self._on_done)
+		if view.file_name() is None:
+			entity.add_caption("Unsaved File")
+		elif view.is_dirty():
+			entity.add_caption("Unsaved Changes")
+
+		if view.is_read_only():
+			entity.add_caption("Read Only")
+
+		return entity
 
 	def _on_done(self,index):
 		"""Callback handler to move focus to the selected tab index"""
 		if index > - 1:
-			sublime.active_window().focus_view(self.views[index])
+			self.window.focus_view(self.views[index])
