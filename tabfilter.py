@@ -22,12 +22,13 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		self.views = []
 		self.prefix = ""
 		self.settings = sublime.load_settings("tabfilter.sublime-settings")
+		self.current_tab_idx = -1
 
 		idx = 0
 		for view in self.window.views():
 			self.views.append(view)
 			if self.window.active_sheet().view().id() == view.id():
-				""" save index for later usage"""
+				# save index for later usage
 				self.current_tab_idx = idx
 			tabs.append(self.make_tab(view))
 			idx = idx + 1
@@ -40,11 +41,16 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		tabs = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
 
+		on_highlight_cb = None
+		selected_index = None
+
 		if preview_tab is True and self.window.num_groups() == 1:
-			# This doesn't work with a multi group layout
-			self.window.show_quick_panel(tabs, self._on_done, on_highlight=self._on_highlighted, selected_index=self.current_tab_idx)
-		else:
-			self.window.show_quick_panel(tabs, self._on_done)
+		    # This doesn't work with a multi group layout
+		    # but otherwise, replace our defaulted arguments.
+		    on_highlight_cb = self._on_highlighted
+		    selected_index = self.current_tab_idx
+
+		self.window.show_quick_panel(tabs, self._on_done, on_highlight=on_highlight_cb, selected_index=selected_index)
 
 	def make_tab(self, view):
 		"""Makes a new Tab entity relating to the given view.
@@ -82,11 +88,10 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 	def _on_done(self,index):
 		"""Callback handler to move focus to the selected tab index"""
-		if index == -1:
+		if index == -1 and self.current_tab_idx != -1:
 			# If the selection was quit, re-focus the last selected Tab
 			self.window.focus_view(self.views[self.current_tab_idx])
-
-		if index > - 1:
+		elif index > - 1:
 			self.window.focus_view(self.views[index])
 
 	def _on_highlighted(self, index):
