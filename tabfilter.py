@@ -42,7 +42,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		tabs = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
 
 		on_highlight_cb = None
-		selected_index = None
+		selected_index = 0
 
 		if preview_tab is True and self.window.num_groups() == 1:
 		    # This doesn't work with a multi group layout
