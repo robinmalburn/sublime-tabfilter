@@ -53,7 +53,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		    on_highlight_cb = self._on_highlighted
 		    selected_index = self.current_tab_idx
 
-		self.window.show_quick_panel(tabs, self._on_done, on_highlight=on_highlight_cb, selected_index=selected_index)
+		self.window.show_quick_panel(tabs, self._on_done, flags=sublime.WANT_EVENT, on_highlight=on_highlight_cb, selected_index=selected_index)
 
 	def make_tab(self, view):
 		"""Makes a new Tab entity relating to the given view.
@@ -89,13 +89,20 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		return entity
 
-	def _on_done(self,index):
+	# XXX event is new in 4096:
+	def _on_done(self, index, event):
 		"""Callback handler to move focus to the selected tab index"""
 		if index == -1 and self.current_tab_idx != -1:
 			# If the selection was quit, re-focus the last selected Tab
 			self.window.focus_view(self.views[self.current_tab_idx])
 		elif index > - 1:
-			self.window.focus_view(self.views[index])
+			if event["modifier_keys"].get("shift", False) == True and self.current_tab_idx != -1 and self.views[index].file_name() is not None:
+				# TODO find a workaround for unsaved tabs not supported (and replace self.views[index].file_name())
+				self.window.focus_view(self.views[self.current_tab_idx])
+				# XXX ADD_TO_SELECTION only works in ST4:
+				self.window.open_file(self.views[index].file_name(), sublime.ADD_TO_SELECTION)
+			else:
+				self.window.focus_view(self.views[index])
 
 	def _on_highlighted(self, index):
 		"""Callback handler to focuses the currently selected/highlighted Tab"""
