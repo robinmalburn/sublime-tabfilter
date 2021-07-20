@@ -1,4 +1,4 @@
-# Copyright (c) 2013 - 2016 Robin Malburn
+# Copyright (c) 2013 - 2021 Robin Malburn
 # See the file license.txt for copying permission.
 
 import os
