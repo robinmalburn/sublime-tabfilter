@@ -14,34 +14,19 @@ Tab Filter is also available through [Package Control](http://wbond.net/sublime\
 
 ### Manual
 
-##### Linux
+From within Sublime Text, go to the `Preferences` > `Browse Pacakges` menu; this should open up your file browser at the correct location for where your copy of Sublime text stores all packages.
 
-Using git:
+From within this folder you can install...
 
-    $ cd ~/.config/sublime-text-3/Packages/
+#### Using git
+
+You can install within the Packages folder opened by running the following from a terminal / console:
+
     $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
 
-Without git:
+#### Without git
 
-Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/.config/sublime-text-3/Packages/Tab Filter`
-
-##### OSX:
-
-Using git:
-
-	$ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
-    $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
-
-Without git:
-
-Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Tab Filter`
-
-##### Windows
-
-I don't currently run Windows, so not sure where the packages live on that platform.  The plugin will work on Windows, though, so if anyone wants to contribute the directories that apply to Windows XP, Vista, 7, or 8, please feel free.
-
+To install without git, download the source code as a zip file and extract the contents to into a subfolder of the Packages folder called `Tab Filter`
 
 ## Usage
 
