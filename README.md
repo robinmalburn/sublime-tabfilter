@@ -4,7 +4,7 @@ Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  In
 
 ## Compatibility
 
-This plugin is compatible with Sublime Text 2 and 3.
+This plugin is compatible with Sublime Text 3 and 4 (and still should be with 2).
 
 ## Installation
 
@@ -18,25 +18,25 @@ Tab Filter is also available through [Package Control](http://wbond.net/sublime\
 
 Using git:
 
-    $ cd ~/.config/sublime-text-2/Packages/
+    $ cd ~/.config/sublime-text-3/Packages/
     $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
 
 Without git:
 
 Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/.config/sublime-text-2/Packages/Tab Filter`
+	`~/.config/sublime-text-3/Packages/Tab Filter`
 
 ##### OSX:
 
 Using git:
 
-	$ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
+	$ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
     $ git clone git://github.com/robinmalburn/sublime-tabfilter.git 'Tab Filter'
 
 Without git:
 
 Download the repository as a zip file and extract the sublime-tabfilter-master folder.  Copy the contents of this folder to:
-	`~/Library/Application\ Support/Sublime\ Text\ 2/Packages/Tab Filter`
+	`~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Tab Filter`
 
 ##### Windows
 
@@ -49,7 +49,7 @@ I don't currently run Windows, so not sure where the packages live on that platf
 
 Tab Filter comes with the following default keymap for Linux, OSX and Windows:  `alt+shift+p`
 
-This can be overriden via the keybindings options in `Preferences > Package Settings > Tab Filter > Key Bindings - User` 
+This can be overriden via the keybindings options in `Preferences > Package Settings > Tab Filter > Key Bindings - User`
 
 ### Command Palette
 
@@ -57,7 +57,7 @@ Tab Filter can also be activated via the Command Palette (brought up using `ctrl
 
 ### Settings
 
-Additional configuration settins for Tab Filter can be altered via `Preferences > Package Settings > Tab Filter > Settings - User` 
+Additional configuration settings for Tab Filter can be altered via `Preferences > Package Settings > Tab Filter > Settings - User`
 
 ##### Captions
 
@@ -66,6 +66,11 @@ Tab Filter can be configured to show or hide additional captions relating to the
 ##### Path/Filename Filtering
 
 By default, Tab Filter only shows the basename of open tabs (where they're really files and not just buffers, of course).  This configuration can be changed to instead show and therefore allow filtering by the full, non-common path of the file instead by changing the `include_path` option to `true`.
+
+##### Preview currently selected entry
+
+By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. Note that this currently only works with a single group layout (no splitted window).
+
 
 ## License
 
