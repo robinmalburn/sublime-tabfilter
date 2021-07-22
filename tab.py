@@ -17,7 +17,7 @@ class Tab(object):
 		Args:
 			caption (str): Caption to add to the Tab's captions list.
 		"""
-		self.captions.append(caption)
+		self.captions.append(str(caption))
 
 	def get_caption(self):
 		"""Returns the captions as a single, comma separated string."""
