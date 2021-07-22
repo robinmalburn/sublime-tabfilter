@@ -56,6 +56,10 @@ By default, Tab Filter only shows the basename of open tabs (where they're reall
 
 By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. Note that this currently only works with a single group layout (no splitted window).
 
+##### Group Caption
+
+By default, Tab Filter only shows information about the filename being worked on, and optionally some meta information available via Path and Captions mentioned above. With this feature, for users who make heavy use of multi-pane layouts, you can now include an indicator of what group a tab belongs to, meaning you can easily see which pane a tab belongs in and differentiate between similarly named files open across different panes.  Two settings control this feature, set `show_group_caption` to `true` to enable the feature and use `group_caption` to control the caption itself - it defaults to `Group:` so that the caption would appear as `Group: 0`, `Group: 1`, etc, but will accept any string.  **Note:** Even if enabled, the feature will only display if there is more than one group, otherwise it's a fairly pointless caption to distract from the relevant information, since every group would be `Group: 0` anyhow.
+
 
 ## License
 

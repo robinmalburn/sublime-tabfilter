@@ -13,5 +13,15 @@
 	 * Allows focus/preview of the currently highlighted entry. Note that this currently only works with a single group layout.
 	 * @param boolean
 	 */
-	"preview_tab" : false
+	"preview_tab" : false,
+	/**
+	 * Display a caption for the group a tab belongs to.
+	 * @param boolean
+	 */
+	"show_group_caption": false,
+	/**
+	 * The group caption to show before the group index when show_group_caption is enabled.
+	 * @param string
+	 */
+	"group_caption": "Group:",
 }

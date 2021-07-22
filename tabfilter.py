@@ -25,13 +25,14 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		self.current_tab_idx = -1
 
 		idx = 0
-		for view in self.window.views():
-			self.views.append(view)
-			if self.window.active_sheet().view().id() == view.id():
-				# save index for later usage
-				self.current_tab_idx = idx
-			tabs.append(self.make_tab(view))
-			idx = idx + 1
+		for group_idx in range(self.window.num_groups()):
+			for view in self.window.views_in_group(group_idx):
+				self.views.append(view)
+				if self.window.active_sheet().view().id() == view.id():
+					# save index for later usage
+					self.current_tab_idx = idx
+				tabs.append(self.make_tab(view, group_idx))
+				idx = idx + 1
 
 		self.prefix = len(os.path.commonprefix([entity.name for entity in tabs if entity.is_file]))
 
@@ -52,12 +53,12 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		self.window.show_quick_panel(tabs, self._on_done, on_highlight=on_highlight_cb, selected_index=selected_index)
 
-	def make_tab(self, view):
+	def make_tab(self, view, group_idx):
 		"""Makes a new Tab entity relating to the given view.
 		Args:
-			view (sublime.View): Sublime View to build the Tab from
+			view (sublime.View): Sublime View to build the Tab from.
+			group_idx (int): The index of the group the view beings to.
 		Returns (Tab): Tab entity containing metadata about the view.
-
 		"""
 		name = view.file_name()
 		is_file = True
@@ -75,6 +76,15 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		if self.window.get_view_index(self.window.active_view()) == self.window.get_view_index(view):
 			entity.add_caption("Current File")
+
+	    # The group caption is fairly useless with just one group, so only show it there
+	    # are multiple groups and the feature's enabled.
+		if self.settings.get("show_group_caption", False) and self.window.num_groups() > 1:
+			group_caption = "{0} {1}".format(
+				str(self.settings.get("group_caption", "Group:")),
+				group_idx
+			)
+			entity.add_caption(group_caption)
 
 		if view.file_name() is None:
 			entity.add_caption("Unsaved File")
