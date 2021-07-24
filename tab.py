@@ -10,7 +10,13 @@ class Tab(object):
 		"""Initialise the Tab."""
 		self.name = name
 		self.is_file = is_file
+		self.path = None
 		self.captions = []
+
+		if self.is_file is True:
+			self.path = "{path}".format(
+				path=os.path.dirname(os.path.abspath(self.name)),
+			)
 
 	def add_caption(self, caption):
 		"""Adds the caption to the list of captions for this Tab.

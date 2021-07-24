@@ -33,7 +33,10 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 			tabs.append(self.make_tab(view))
 			idx = idx + 1
 
-		self.prefix = len(os.path.commonprefix([entity.name for entity in tabs if entity.is_file]))
+		common_prefix = os.path.commonprefix([entity.path for entity in tabs if entity.is_file])
+		if os.path.isdir(common_prefix) is False:
+			common_prefix = common_prefix[:common_prefix.rfind(os.path.sep)]
+		self.prefix = len(common_prefix)
 
 		show_captions = self.settings.get("show_captions", True)
 		include_path = self.settings.get("include_path", False)
