@@ -23,9 +23,20 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		self.prefix = ""
 		self.settings = sublime.load_settings("tabfilter.sublime-settings")
 		self.current_tab_idx = -1
+		self.group_caption_prefix = str(self.settings.get("group_caption", "Group:"))
+		self.show_group_caption = self.settings.get("show_group_caption", False)
+
+		if self.window.num_groups() == 1:
+			# If we only have one group, there's no use showing the group caption.
+			self.show_group_caption = False
+
+		group_indexes = range(self.window.num_groups())
+
+		if self.settings.get("restrict_to_active_group", False) == True:
+			group_indexes = [self.window.active_group()]
 
 		idx = 0
-		for group_idx in range(self.window.num_groups()):
+		for group_idx in group_indexes:
 			for view in self.window.views_in_group(group_idx):
 				self.views.append(view)
 				if self.window.active_sheet().view().id() == view.id():
@@ -77,11 +88,9 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		if self.window.get_view_index(self.window.active_view()) == self.window.get_view_index(view):
 			entity.add_caption("Current File")
 
-	    # The group caption is fairly useless with just one group, so only show it there
-	    # are multiple groups and the feature's enabled.
-		if self.settings.get("show_group_caption", False) and self.window.num_groups() > 1:
+		if self.show_group_caption:
 			group_caption = "{0} {1}".format(
-				str(self.settings.get("group_caption", "Group:")),
+				self.group_caption_prefix,
 				group_idx
 			)
 			entity.add_caption(group_caption)
