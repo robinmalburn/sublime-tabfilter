@@ -1,5 +1,8 @@
 [
 	{ "keys": ["shift+alt+p"],
 		"command": "tab_filter" 
+	},
+	{ "keys": ["control+shift+alt+p"],
+		"command": "tab_filter_active_group" 
 	}
 ]

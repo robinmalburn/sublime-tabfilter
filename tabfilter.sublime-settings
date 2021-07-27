@@ -24,9 +24,4 @@
 	 * @param string
 	 */
 	"group_caption": "Group:",
-	/**
-	 * Restricts to only showing tabs from the active group.
-	 * @param boolean
-	 */
-	"restrict_to_active_group": false,
 }

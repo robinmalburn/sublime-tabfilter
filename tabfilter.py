@@ -11,31 +11,43 @@ except ValueError:
 	#Python 2 / ST2 fallback for relative import.
 	import tab
 
-class TabFilterCommand(sublime_plugin.WindowCommand):
-	"""Provides a GoToAnything style interface for searching and selecting open tabs"""
+class BaseTabFilter(sublime_plugin.WindowCommand):
+	"""Provides a GoToAnything style interface for searching and selecting open tabs."""
+
+	window = None
+	views = None
+	settings = None
+	current_tab_idx = -1
+	prefix = ""
+	show_group_caption = False
+	group_caption_prefix = "Group:"
+	preview_tab = False
+
+	def __init__(self, *args, **kwargs):
+		"""Initialises the tab filter instance and calls the parent command initiaser."""
+		super().__init__(*args, **kwargs)
+		self.window = sublime.active_window()
+		self.views = []
+		self.settings = sublime.load_settings("tabfilter.sublime-settings")
+		self.group_caption_prefix = str(self.settings.get("group_caption", type(self).group_caption_prefix))
+		self.show_group_caption = self.settings.get("show_group_caption", type(self).show_group_caption)
+		self.preview_tab = self.settings.get("preview_tab", type(self).preview_tab)
 
 	def run(self):
 		"""Shows a quick panel to filter and select tabs from the active window"""
 
+		# To be replaced with consistent abstract method when moving to Python 3 only implementation.
+		raise NotImplementedError("Subclasses must implemented run method locally.")
+
+	def gather_tabs(self, group_indexes):
+		"""Gather tabs from the given group indexes.
+			Args:
+				group_indexes (list[int]): A list of zero or more group indexes to retrieve tabs from.
+			Returns (list[Tab]): A list of zero or more tabs from the given group indexes.
+		"""
 		tabs = []
-		self.window = sublime.active_window()
-		self.views = []
-		self.prefix = ""
-		self.settings = sublime.load_settings("tabfilter.sublime-settings")
-		self.current_tab_idx = -1
-		self.group_caption_prefix = str(self.settings.get("group_caption", "Group:"))
-		self.show_group_caption = self.settings.get("show_group_caption", False)
-
-		if self.window.num_groups() == 1:
-			# If we only have one group, there's no use showing the group caption.
-			self.show_group_caption = False
-
-		group_indexes = range(self.window.num_groups())
-
-		if self.settings.get("restrict_to_active_group", False) == True:
-			group_indexes = [self.window.active_group()]
-
 		idx = 0
+		self.views = []
 		for group_idx in group_indexes:
 			for view in self.window.views_in_group(group_idx):
 				self.views.append(view)
@@ -44,7 +56,15 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 					self.current_tab_idx = idx
 				tabs.append(self.make_tab(view, group_idx))
 				idx = idx + 1
+		return tabs
 
+	def format_tabs(self, tabs):
+		"""Formats tabs for display in the quick info panel.
+			Args:
+				tabs (list[Tab]): A list of one or more tabs for formating.
+			Returns (list[list[str]]): Returns a list of lists containing the title, subtitle and
+			 captions for each quick info panel entry.
+		"""
 		common_prefix = os.path.commonprefix([entity.path for entity in tabs if entity.is_file])
 		if os.path.isdir(common_prefix) is False:
 			common_prefix = common_prefix[:common_prefix.rfind(os.path.sep)]
@@ -52,22 +72,19 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		show_captions = self.settings.get("show_captions", True)
 		include_path = self.settings.get("include_path", False)
-		preview_tab = self.settings.get("preview_tab", False)
 
-		tabs = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
+		return [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
 
-		if preview_tab is True:
-			# We can't support previewing the tab if there's more than one window group
-			# or if we're running Sublime Text 2.
-			preview_tab = self.window.num_groups() == 1 and sublime.version() != '2221'
-
-		if preview_tab is True:
+	def display_quick_info_panel(self, tabs):
+		"""Displays the quick info panel with the formatted tabs.
+			Args:
+				tabs (list[list[str]]): A list of lists containing the title, subtitle and captions for display.
+		"""
+		if self.preview_tab is True:
 			self.window.show_quick_panel(tabs, self._on_done, on_highlight=self._on_highlighted, selected_index=self.current_tab_idx)
 			return
 
 		self.window.show_quick_panel(tabs, self._on_done)
-
-
 
 	def make_tab(self, view, group_idx):
 		"""Makes a new Tab entity relating to the given view.
@@ -121,3 +138,45 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 	def _on_highlighted(self, index):
 		"""Callback handler to focuses the currently selected/highlighted Tab"""
 		self.window.focus_view(self.views[index])
+
+class TabFilterCommand(BaseTabFilter):
+	"""Provides a GoToAnything style interface for searching and selecting open tabs across all groups."""
+
+	def run(self):
+		"""Shows a quick panel to filter and select tabs from the active window."""
+		tabs = self.gather_tabs(range(self.window.num_groups()))
+
+		self.display_quick_info_panel(self.format_tabs(tabs))
+
+	def display_quick_info_panel(self, tabs):
+		"""Displays the quick info panel with the formatted tabs.
+			Args:
+				tabs (list[list[str]]): A list of lists containing the title, subtitle and captions for display.
+		"""
+		if self.preview_tab is True:
+			# We can't support previewing the tab if there's more than one window group
+			# or if we're running Sublime Text 2.
+			self.preview_tab = self.window.num_groups() == 1 and sublime.version() != '2221'
+
+		super().display_quick_info_panel(tabs)
+
+class TabFilterActiveGroupCommand(BaseTabFilter):
+	"""Provides a GoToAnything style interface for searching and selecting open tabs within the active group."""
+
+	def run(self):
+		"""Shows a quick panel to filter and select tabs from the active window."""
+		tabs = self.gather_tabs([self.window.active_group()])
+
+		self.display_quick_info_panel(self.format_tabs(tabs))
+
+
+	def display_quick_info_panel(self, tabs):
+		"""Displays the quick info panel with the formatted tabs.
+			Args:
+				tabs (list[list[str]]): A list of lists containing the title, subtitle and captions for display.
+		"""
+		if self.preview_tab is True:
+			# We can't support previewing if we're running Sublime Text 2.
+			self.preview_tab = sublime.version() != '2221'
+
+		super().display_quick_info_panel(tabs)
