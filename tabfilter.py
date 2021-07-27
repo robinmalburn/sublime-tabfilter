@@ -39,7 +39,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		for group_idx in group_indexes:
 			for view in self.window.views_in_group(group_idx):
 				self.views.append(view)
-				if self.window.active_sheet().view().id() == view.id():
+				if self.window.active_view().id() == view.id():
 					# save index for later usage
 					self.current_tab_idx = idx
 				tabs.append(self.make_tab(view, group_idx))
@@ -56,16 +56,18 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 
 		tabs = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
 
-		on_highlight_cb = None
-		selected_index = 0
+		if preview_tab is True:
+			# We can't support previewing the tab if there's more than one window group
+			# or if we're running Sublime Text 2.
+			preview_tab = self.window.num_groups() == 1 and sublime.version() != '2221'
 
-		if preview_tab is True and self.window.num_groups() == 1:
-		    # This doesn't work with a multi group layout
-		    # but otherwise, replace our defaulted arguments.
-		    on_highlight_cb = self._on_highlighted
-		    selected_index = self.current_tab_idx
+		if preview_tab is True:
+			self.window.show_quick_panel(tabs, self._on_done, on_highlight=self._on_highlighted, selected_index=self.current_tab_idx)
+			return
 
-		self.window.show_quick_panel(tabs, self._on_done, on_highlight=on_highlight_cb, selected_index=selected_index)
+		self.window.show_quick_panel(tabs, self._on_done)
+
+
 
 	def make_tab(self, view, group_idx):
 		"""Makes a new Tab entity relating to the given view.

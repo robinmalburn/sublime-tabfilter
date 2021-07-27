@@ -54,7 +54,7 @@ By default, Tab Filter only shows the basename of open tabs (where they're reall
 
 ##### Preview currently selected entry
 
-By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. Note that this currently only works with a single group layout (no splitted window).
+By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. **Note** that this currently only works with a single group layout (no splitted window) and is **not** supported in Sublime Text 2.
 
 ##### Group Caption
 
