@@ -4,21 +4,14 @@
 import sublime
 import sublime_plugin
 import os
-try:
-	#Python 3 / ST3 relative import within package.
-	from . import tab
-except ValueError:
-	#Python 2 / ST2 fallback for relative import.
-	import tab
+from .tab import Tab
 
 class TabFilterCommand(sublime_plugin.WindowCommand):
 	"""Provides a GoToAnything style interface for searching and selecting open tabs"""
 
 	def run(self):
 		"""Shows a quick panel to filter and select tabs from the active window"""
-
 		tabs = []
-		self.window = sublime.active_window()
 		self.views = []
 		self.prefix = ""
 		self.settings = sublime.load_settings("tabfilter.sublime-settings")
@@ -47,14 +40,13 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 		if preview_tab is True:
 			# We can't support previewing the tab if there's more than one window group
 			# or if we're running Sublime Text 2.
-			preview_tab = self.window.num_groups() == 1 and sublime.version() != '2221'
+			preview_tab = self.window.num_groups() == 1
 
 		if preview_tab is True:
 			self.window.show_quick_panel(tabs, self._on_done, on_highlight=self._on_highlighted, selected_index=self.current_tab_idx)
 			return
 
 		self.window.show_quick_panel(tabs, self._on_done)
-
 
 
 	def make_tab(self, view):
@@ -76,7 +68,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
 			if len(name) == 0:
 				name = "untitled"
 
-		entity = tab.Tab(name, is_file)
+		entity = Tab(name, is_file)
 
 		if self.window.get_view_index(self.window.active_view()) == self.window.get_view_index(view):
 			entity.add_caption("Current File")
