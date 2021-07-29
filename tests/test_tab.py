@@ -1,3 +1,6 @@
+# Copyright (c) 2013 - 2021 Robin Malburn
+# See the file license.txt for copying permission.
+
 from unittest import TestCase
 from unittest.mock import patch
 from importlib import import_module
