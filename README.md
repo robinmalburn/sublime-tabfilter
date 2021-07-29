@@ -4,7 +4,9 @@ Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  In
 
 ## Compatibility
 
-This plugin is compatible with Sublime Text 3 and 4.
+This plugin is compatible with Sublime Text 4.
+
+For Sublime Text 2 and 3 support, please see [release 1.4](https://github.com/robinmalburn/sublime-tabfilter/tree/release/1.4) - still also avalable via Package Control, though no longer actively updated with new features.
 
 ## Installation
 
