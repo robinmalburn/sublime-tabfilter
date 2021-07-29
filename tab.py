@@ -1,7 +1,7 @@
 # Copyright (c) 2013 - 2021 Robin Malburn
 # See the file license.txt for copying permission.
 
-import os
+from os import path
 
 class Tab(object):
 	"""Represent a Sublime tab and the relevant metadata."""
@@ -15,7 +15,7 @@ class Tab(object):
 
 		if self.is_file is True:
 			self.path = "{path}".format(
-				path=os.path.dirname(os.path.abspath(self.name)),
+				path=path.dirname(path.abspath(self.name)),
 			)
 
 	def add_caption(self, caption):
@@ -23,7 +23,7 @@ class Tab(object):
 		Args:
 			caption (str): Caption to add to the Tab's captions list.
 		"""
-		self.captions.append(caption)
+		self.captions.append(str(caption))
 
 	def get_caption(self):
 		"""Returns the captions as a single, comma separated string."""
@@ -42,8 +42,10 @@ class Tab(object):
 		short_name = self.name
 
 		if self.is_file:
-			name = os.path.basename(self.name)
+			name = path.basename(self.name)
 			short_name = self.name[prefix_trim:]
+			if prefix_trim > 0:
+				short_name = "...{}".format(short_name)
 			if include_path:
 				name = short_name
 
