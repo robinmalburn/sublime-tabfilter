@@ -11,8 +11,8 @@ except ImportError:
     # If we're running these tests in UnitTesting, then we need to use
     # The package name - Tab Filter - so let's grab import lib and try again.
     from importlib import import_module
-    settings = import_module(".core.settings", "Tab Filter")
-    entities = import_module(".core.entities", "Tab Filter")
+    settings = import_module(".lib.settings", "Tab Filter")
+    entities = import_module(".lib.entities", "Tab Filter")
 
 ShowCaptionsTabSetting = settings.ShowCaptionsTabSetting
 IncludePathTabSetting = settings.IncludePathTabSetting
