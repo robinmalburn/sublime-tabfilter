@@ -4,7 +4,9 @@ Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  In
 
 ## Compatibility
 
-This plugin is compatible with Sublime Text 3 and 4 (and still should be with 2).
+This plugin is compatible with Sublime Text 4.
+
+For Sublime Text 2 and 3 support, please see [release 1.4](https://github.com/robinmalburn/sublime-tabfilter/tree/release/1.4) - still also avalable via Package Control, though no longer actively updated with new features.
 
 ## Installation
 
@@ -54,7 +56,7 @@ By default, Tab Filter only shows the basename of open tabs (where they're reall
 
 ##### Preview currently selected entry
 
-By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. **Note** that this currently only works with a single group layout (no splitted window) and is **not** supported in Sublime Text 2.
+By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. **Note** that this currently only works with a single group layout (no split window).
 
 ##### Group Caption
 

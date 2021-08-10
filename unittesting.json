@@ -1,0 +1,8 @@
+{
+    "tests_dir" : "tests",
+    "pattern" : "test_*.py",
+    "verbosity": 2,
+    "output": "<panel>",
+    "capture_console": true,
+    "deferred": true
+}

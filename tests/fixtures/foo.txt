@@ -1,0 +1,1 @@
+Foo fixture for testing a file on disk.
