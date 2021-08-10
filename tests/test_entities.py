@@ -6,12 +6,12 @@ from os import path
 from unittest import TestCase
 from typing import List, Tuple, Optional
 try:
-    import entities
+    from lib import entities
 except ImportError:
     # If we're running these tests in UnitTesting, then we need to use
     # The package name - Tab Filter - so let's grab import lib and try again.
     from importlib import import_module
-    entities = import_module(".entities", "Tab Filter")
+    entities = import_module(".lib.entities", "Tab Filter")
 
 Tab = entities.Tab
 

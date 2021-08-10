@@ -6,14 +6,13 @@ from unittesting import DeferrableTestCase  # type: ignore
 from os import path
 from typing import List, Tuple, Dict, Generator
 try:
-    import settings
-    import entities
+    from lib import settings, entities
 except ImportError:
     # If we're running these tests in UnitTesting, then we need to use
     # The package name - Tab Filter - so let's grab import lib and try again.
     from importlib import import_module
-    settings = import_module(".settings", "Tab Filter")
-    entities = import_module(".entities", "Tab Filter")
+    settings = import_module(".core.settings", "Tab Filter")
+    entities = import_module(".core.entities", "Tab Filter")
 
 ShowCaptionsTabSetting = settings.ShowCaptionsTabSetting
 IncludePathTabSetting = settings.IncludePathTabSetting

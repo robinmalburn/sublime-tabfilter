@@ -2,11 +2,11 @@
 # See the file license.txt for copying permission.
 
 import sublime  # type: ignore
-import sublime_plugin  #type: ignore
+import sublime_plugin  # type: ignore
 from os import path
 from typing import List, Tuple
-from .entities import Tab
-from .settings import TabSetting, ShowCaptionsTabSetting, IncludePathTabSetting
+from .lib.entities import Tab
+from .lib.settings import TabSetting, ShowCaptionsTabSetting, IncludePathTabSetting
 
 
 class TabFilterCommand(sublime_plugin.WindowCommand):
