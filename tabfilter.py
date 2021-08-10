@@ -1,20 +1,21 @@
 # Copyright (c) 2013 - 2021 Robin Malburn
 # See the file license.txt for copying permission.
 
-import sublime
-import sublime_plugin
+import sublime  # type: ignore
+import sublime_plugin  #type: ignore
 from os import path
-from typing import List
+from typing import List, Tuple
 from .entities import Tab
+from .settings import TabSetting, ShowCaptionsTabSetting, IncludePathTabSetting
 
 
 class TabFilterCommand(sublime_plugin.WindowCommand):
     """Provides a GoToAnything style interface for working with open tabs"""
 
-    views: List[sublime.View]
-    prefix: int
-    settings: sublime.Settings
+    views: List[sublime.View] = []
+    prefix: int = 0
     current_tab_idx: int = -1
+    settings: sublime.Settings
 
     def run(self) -> None:
         """Shows a quick panel for tabs from the active window."""
@@ -23,6 +24,10 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
         self.prefix = 0
         self.settings = sublime.load_settings("tabfilter.sublime-settings")
         self.current_tab_idx = -1
+        tab_settings: Tuple[TabSetting, ...] = (
+            ShowCaptionsTabSetting(self.settings),
+            IncludePathTabSetting(self.settings)
+        )
 
         idx: int = 0
         for view in self.window.views():
@@ -30,7 +35,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
             if self.window.active_view().id() == view.id():
                 # save index for later usage
                 self.current_tab_idx = idx
-            tabs.append(self.make_tab(view))
+            tabs.append(Tab(view))
             idx = idx + 1
 
         common_prefix: str = path.commonprefix(
@@ -41,11 +46,17 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
             common_prefix = common_prefix[:common_prefix.rfind(path.sep)]
         self.prefix = len(common_prefix)
 
-        show_captions: bool = self.settings.get("show_captions", True)
-        include_path: bool = self.settings.get("include_path", False)
+        if self.prefix > 0:
+            for tab in tabs:
+                if tab.is_file_view():
+                    tab.set_subtitle(f"...{tab.get_subtitle()[self.prefix:]}")
+
+        for setting in tab_settings:
+            tabs = setting.apply(tabs)
+
         preview_tab: bool = self.settings.get("preview_tab", False)
 
-        details: List[List[str]] = [entity.get_details(self.prefix, include_path, show_captions) for entity in tabs]
+        details: List[List[str]] = [entity.get_details() for entity in tabs]
 
         if preview_tab is True:
             # We can't support previewing the tab if there's
@@ -55,56 +66,23 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
         if preview_tab is True:
             self.window.show_quick_panel(
                 details,
-                self._on_done,
-                on_highlight=self._on_highlighted,
+                self.on_done,
+                on_highlight=self.on_highlighted,
                 selected_index=self.current_tab_idx
             )
             return
 
-        self.window.show_quick_panel(details, self._on_done)
+        self.window.show_quick_panel(details, self.on_done)
 
-    def make_tab(self, view: sublime.View) -> Tab:
-        """Makes a new Tab entity relating to the given view.
-        Args:
-            view (sublime.View): Sublime View to build the Tab from
-        Returns (Tab): Tab entity containing metadata about the view.
-
-        """
-        name: str = view.file_name()
-        is_file: bool = True
-
-        # If the name is not set, then we're dealing with a buffer
-        # rather than a file, so deal with it accordingly.
-        if name is None:
-            is_file = False
-            name = view.name()
-            # set the view name to untitled if we get an empty name
-            if len(name) == 0:
-                name = "untitled"
-
-        entity: Tab = Tab(name, is_file)
-
-        if self.window.active_view().id() == view.id():
-            entity.add_caption("Current File")
-
-        if view.file_name() is None:
-            entity.add_caption("Unsaved File")
-        elif view.is_dirty():
-            entity.add_caption("Unsaved Changes")
-
-        if view.is_read_only():
-            entity.add_caption("Read Only")
-
-        return entity
-
-    def _on_done(self, index) -> None:
-        """Callback handler to move focus to the selected tab index"""
+    def on_done(self, index) -> None:
+        """Callback handler to move focus to the selected tab index."""
         if index == -1 and self.current_tab_idx != -1:
             # If the selection was quit, re-focus the last selected Tab
             self.window.focus_view(self.views[self.current_tab_idx])
-        elif index > - 1:
+        elif index > -1 and index < len(self.views):
             self.window.focus_view(self.views[index])
 
-    def _on_highlighted(self, index) -> None:
-        """Callback handler to focuses the currently selected/highlighted Tab"""
-        self.window.focus_view(self.views[index])
+    def on_highlighted(self, index) -> None:
+        """Callback handler to focus the currently highlighted Tab."""
+        if index > -1 and index < len(self.views):
+            self.window.focus_view(self.views[index])
