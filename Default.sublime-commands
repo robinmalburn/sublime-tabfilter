@@ -1,10 +1,11 @@
 [
-	{
-		"caption": "Tab Filter",
-		"command": "tab_filter"
-	},
-	{
-		"caption": "Tab Filter (Active Group)",
-		"command": "tab_filter_active_group"
-	}
+    {
+        "caption": "Tab Filter",
+        "command": "tab_filter"
+    },
+    {
+        
+        "caption": "Tab Filter (Active Group)",
+        "command": "tab_filter_active_group"
+    }
 ]
