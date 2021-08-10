@@ -6,36 +6,33 @@ import sublime_plugin  # type: ignore
 from os import path
 from typing import List, Tuple
 from .lib.entities import Tab
-from .lib.settings import TabSetting, ShowCaptionsTabSetting, IncludePathTabSetting
+from .lib.settings import (
+    TabSetting,
+    ShowCaptionsTabSetting,
+    IncludePathTabSetting
+)
 
 
-class BaseTabFilter(sublime_plugin.WindowCommand):
-    """Provides a GoToAnything style interface for searching and selecting open tabs."""
+class BaseTabFilterCommand(sublime_plugin.WindowCommand):
+    """Provides a GoToAnything style interface for
+        searching and selecting open tabs.
+    """
+    window: sublime.Window
     views: List[sublime.View] = []
     prefix: int = 0
     current_tab_idx: int = -1
     settings: sublime.Settings
 
     def __init__(self, *args, **kwargs):
-        """Initialises the tab filter instance and calls the parent command initialiser."""
+        """Initialises the tab filter instance and calls the parent command init."""
         super().__init__(*args, **kwargs)
         self.views = []
         self.settings = sublime.load_settings("tabfilter.sublime-settings")
 
-    def run(self):
-        """Shows a quick panel to filter and select tabs from the active window."""
-
-        # To be replaced with consistent abstract method when moving to Python 3 only implementation.
-        raise NotImplementedError("Subclasses must implemented run method locally.")
-
-    def gather_tabs(self, group_indexes):
-        """Gather tabs from the given group indexes.
-            Args:
-                group_indexes (list[int]): A list of zero or more group indexes to retrieve tabs from.
-            Returns (list[Tab]): A list of zero or more tabs from the given group indexes.
-        """
-        tabs = []
-        idx = 0
+    def gather_tabs(self, group_indexes: List[int]) -> List[Tab]:
+        """Gather tabs from the given group indexes."""
+        tabs: List[Tab] = []
+        idx: int = 0
         self.views = []
         for group_idx in group_indexes:
             for view in self.window.views_in_group(group_idx):
@@ -47,21 +44,20 @@ class BaseTabFilter(sublime_plugin.WindowCommand):
                 idx = idx + 1
         return tabs
 
-    def format_tabs(self, tabs):
-        """Formats tabs for display in the quick info panel.
-            Args:
-                tabs (list[Tab]): A list of one or more tabs for formating.
-            Returns (list[list[str]]): Returns a list of lists containing the title, subtitle and
-             captions for each quick info panel entry.
-        """
+    def format_tabs(self, tabs: List[Tab]) -> List[List[str]]:
+        """Formats tabs for display in the quick info panel."""
         tab_settings: Tuple[TabSetting, ...] = (
             ShowCaptionsTabSetting(self.settings),
             IncludePathTabSetting(self.settings)
         )
 
         common_prefix: str = path.commonprefix(
-            [entity.path for entity in tabs if entity.is_file]
-            )
+            [
+                str(entity.get_path())
+                for entity in tabs
+                if entity.is_file_view()
+            ]
+        )
 
         if path.isdir(common_prefix) is False:
             common_prefix = common_prefix[:common_prefix.rfind(path.sep)]
@@ -77,11 +73,8 @@ class BaseTabFilter(sublime_plugin.WindowCommand):
 
         return [entity.get_details() for entity in tabs]
 
-    def display_quick_info_panel(self, tabs, preview):
-        """Displays the quick info panel with the formatted tabs.
-            Args:
-                tabs (list[list[str]]): A list of lists containing the title, subtitle and captions for display.
-        """
+    def display_quick_info_panel(self, tabs: List[List[str]], preview: bool) -> None:
+        """Displays the quick info panel with the formatted tabs."""
         if preview is True:
             self.window.show_quick_panel(
                 tabs,
@@ -93,7 +86,7 @@ class BaseTabFilter(sublime_plugin.WindowCommand):
 
         self.window.show_quick_panel(tabs, self.on_done)
 
-    def on_done(self, index) -> None:
+    def on_done(self, index: int) -> None:
         """Callback handler to move focus to the selected tab index."""
         if index == -1 and self.current_tab_idx != -1:
             # If the selection was quit, re-focus the last selected Tab
@@ -101,13 +94,13 @@ class BaseTabFilter(sublime_plugin.WindowCommand):
         elif index > -1 and index < len(self.views):
             self.window.focus_view(self.views[index])
 
-    def on_highlighted(self, index) -> None:
+    def on_highlighted(self, index: int) -> None:
         """Callback handler to focus the currently highlighted Tab."""
         if index > -1 and index < len(self.views):
             self.window.focus_view(self.views[index])
 
 
-class TabFilterCommand(BaseTabFilter):
+class TabFilterCommand(BaseTabFilterCommand):
     """Provides a GoToAnything style interface for searching and selecting open tabs across all groups."""
 
     def run(self):
@@ -125,7 +118,7 @@ class TabFilterCommand(BaseTabFilter):
         )
 
 
-class TabFilterActiveGroupCommand(BaseTabFilter):
+class TabFilterActiveGroupCommand(BaseTabFilterCommand):
     """Provides a GoToAnything style interface for searching and selecting open tabs within the active group."""
 
     def run(self):
