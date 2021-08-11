@@ -9,7 +9,8 @@ from .lib.entities import Tab
 from .lib.settings import (
     TabSetting,
     ShowCaptionsTabSetting,
-    IncludePathTabSetting
+    IncludePathTabSetting,
+    ShowGroupCaptionTabSetting,
 )
 
 
@@ -24,7 +25,9 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
     settings: sublime.Settings
 
     def __init__(self, *args, **kwargs):
-        """Initialises the tab filter instance and calls the parent command init."""
+        """Initialises the tab filter instance and
+            calls the parent command initialiser.
+        """
         super().__init__(*args, **kwargs)
         self.views = []
         self.settings = sublime.load_settings("tabfilter.sublime-settings")
@@ -48,7 +51,8 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
         """Formats tabs for display in the quick info panel."""
         tab_settings: Tuple[TabSetting, ...] = (
             ShowCaptionsTabSetting(self.settings),
-            IncludePathTabSetting(self.settings)
+            IncludePathTabSetting(self.settings),
+            ShowGroupCaptionTabSetting(self.settings),
         )
 
         common_prefix: str = path.commonprefix(
@@ -73,7 +77,11 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
 
         return [entity.get_details() for entity in tabs]
 
-    def display_quick_info_panel(self, tabs: List[List[str]], preview: bool) -> None:
+    def display_quick_info_panel(
+        self,
+        tabs: List[List[str]],
+        preview: bool
+    ) -> None:
         """Displays the quick info panel with the formatted tabs."""
         if preview is True:
             self.window.show_quick_panel(
@@ -101,10 +109,14 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
 
 
 class TabFilterCommand(BaseTabFilterCommand):
-    """Provides a GoToAnything style interface for searching and selecting open tabs across all groups."""
+    """Provides a GoToAnything style interface for searching
+        and selecting open tabs across all groups.
+    """
 
     def run(self):
-        """Shows a quick panel to filter and select tabs from the active window."""
+        """Shows a quick panel to filter and select tabs from
+            the active window.
+        """
         tabs = self.gather_tabs(range(self.window.num_groups()))
 
         preview: bool = (
@@ -119,10 +131,14 @@ class TabFilterCommand(BaseTabFilterCommand):
 
 
 class TabFilterActiveGroupCommand(BaseTabFilterCommand):
-    """Provides a GoToAnything style interface for searching and selecting open tabs within the active group."""
+    """Provides a GoToAnything style interface for searching
+        and selecting open tabs within the active group.
+    """
 
     def run(self):
-        """Shows a quick panel to filter and select tabs from the active window."""
+        """Shows a quick panel to filter and select tabs from
+            the active window.
+        """
         tabs = self.gather_tabs([self.window.active_group()])
 
         self.display_quick_info_panel(

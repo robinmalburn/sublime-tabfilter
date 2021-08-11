@@ -8,19 +8,17 @@ from unittest.mock import patch
 from typing import List, Dict, Generator
 try:
     import tabfilter
+    from lib import settings
 except ImportError:
     # If we're running these tests in UnitTesting, then we need to use
     # The package name - Tab Filter - so let's grab import lib and try again.
     from importlib import import_module
     tabfilter = import_module(".tabfilter", "Tab Filter")
+    settings = import_module(".lib.settings", "Tab Filter")
 
 TabFilterCommand = tabfilter.TabFilterCommand
 
-DEFAULT_SETINGS: Dict[str, bool] = {
-    "show_captions": True,
-    "include_path": False,
-    "preview_tab": False
-}
+DEFAULT_SETINGS = settings.DEFAULT_SETINGS
 
 
 class TabFilterCommandTestCase(DeferrableTestCase):
@@ -341,3 +339,32 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             # Also test values greatly outside the expected range.
             cmd.on_highlighted(100)
             mock_focus_view.assert_not_called()
+
+    def test_run_with_scratch_and_group_caption(self) -> None:
+        """Test running with a scratch buffer and group caption enabled."""
+        self.settings.set("show_group_caption", True)
+        self.settings.set("show_captions", False)
+        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
+            window: sublime.Window = sublime.active_window()
+
+            view: sublime.View = window.new_file()
+            view.set_scratch(True)
+
+            # single column layout
+            layout: Dict[str, List] = {
+                "cells": [[0, 0, 1, 1]],
+                "cols": [0.0, 1.0],
+                "rows": [0.0, 1.0]
+            }
+
+            sublime.active_window().set_layout(layout)
+
+            cmd: TabFilterCommand = TabFilterCommand(window)
+            cmd.run()
+
+            expected: List[str] = [
+                "untitled",
+                "untitled",
+                "Group: 1"
+            ]
+            mock_panel.assert_called_once_with([expected], cmd.on_done)
