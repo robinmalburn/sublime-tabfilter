@@ -22,6 +22,7 @@ Tab = entities.Tab
 
 DEFAULT_SETINGS = settings.DEFAULT_SETINGS
 
+
 class BaseSettingsTestCase(DeferrableTestCase):
     """Base settings test case to set up boiler plate methods."""
     settings: sublime.Settings
