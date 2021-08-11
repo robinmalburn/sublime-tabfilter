@@ -2,9 +2,17 @@
 # See the file license.txt for copying permission.
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict, Union
 from .entities import Tab
 from sublime import Settings, View  # type: ignore
+
+DEFAULT_SETINGS: Dict[str, Union[bool, str]] = {
+    "show_captions": True,
+    "include_path": False,
+    "preview_tab": False,
+    "show_group_caption": False,
+    "group_caption": "Group:"
+}
 
 
 class Setting(ABC):
@@ -70,4 +78,24 @@ class IncludePathTabSetting(TabSetting):
         for tab in tabs:
             if tab.is_file_view() is True:
                 tab.set_title(tab.get_subtitle())
+        return tabs
+
+
+class ShowGroupCaptionTabSetting(TabSetting):
+    """Setting for showing captions on tabs."""
+    def is_enabled(self) -> bool:
+        return self.settings.get("show_group_caption") is True
+
+    def apply(self, tabs: List[Tab]) -> List[Tab]:
+        if self.is_enabled() is False:
+            return tabs
+
+        prefix: str = self.settings.get("group_caption", "Group:")
+
+        for tab in tabs:
+            view: View = tab.get_view()
+            # Group's are zero based, so lets add 1 one to the offset
+            # to make them a bit more human friendly.
+            group: int = view.sheet().group() + 1
+            tab.add_caption(f"{prefix} {group}")
         return tabs
