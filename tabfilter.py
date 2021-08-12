@@ -47,7 +47,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
         for setting in formatting_settings:
             tabs = setting.apply(tabs)
 
-        return [entity.get_details() for entity in tabs]
+        return [tab.get_details() for tab in tabs]
 
     def display_quick_info_panel(
         self,
@@ -85,7 +85,7 @@ class TabFilterCommand(sublime_plugin.WindowCommand):
         """
         self.views = []
         self.settings = sublime.load_settings("tabfilter.sublime-settings")
-        
+
         groups: List[int] = [self.window.active_group()]
 
         if active_group_only is False:
