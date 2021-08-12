@@ -127,18 +127,136 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             cmd.gather_tabs(groups)
         )
 
-    def test_run_with_no_files(self) -> None:
-        """Tests running with a single file."""
+    def test_format_tabs(self) -> None:
+        """Tests formatting tabs."""
+        window: sublime.Window = sublime.active_window()
+        view: sublime.View = window.new_file()
+        view.set_scratch(True)
+
+        cmd: TabFilterCommand = TabFilterCommand(window)
+
+        tabs: List[entities.Tab] = [entities.Tab(view)]
+
+        with patch.object(
+                settings.CommonPrefixTabSetting,
+                "apply",
+                return_value=tabs
+        ) as mock_apply:
+            setting: settings.CommonPrefixTabSetting
+
+            setting = settings.CommonPrefixTabSetting(
+                self.settings,
+                sublime.active_window()
+            )
+
+            details: List[List[str]] = [tab.get_details() for tab in tabs]
+
+            self.assertEqual(
+                details,
+                cmd.format_tabs(tabs, (setting,))
+            )
+            mock_apply.assert_called_once_with(tabs)
+
+    def test_display_quick_info_no_preview(self) -> None:
+        """Tests displaying the quick info panel, without preview."""
         with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
             window: sublime.Window = sublime.active_window()
 
             cmd: TabFilterCommand = TabFilterCommand(window)
+
+            tabs: List[List[str]] = [["untitled", "untitled"]]
+
+            cmd.display_quick_info_panel(tabs, preview=False)
+
+            mock_panel.assert_called_once_with(tabs, cmd.on_done)
+
+    def test_display_quick_info_with_preview(self) -> None:
+        """Tests displaying the quick info panel, with preview."""
+        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
+            window: sublime.Window = sublime.active_window()
+
+            cmd: TabFilterCommand = TabFilterCommand(window)
+
+            tabs: List[List[str]] = [["untitled", "untitled"]]
+
+            cmd.display_quick_info_panel(tabs, preview=True)
+
+            mock_panel.assert_called_once_with(
+                tabs,
+                cmd.on_done,
+                on_highlight=cmd.on_highlighted,
+                selected_index=-1
+            )
+
+    @patch.object(settings.CommonPrefixTabSetting, "apply")
+    @patch.object(settings.ShowGroupCaptionTabSetting, "apply")
+    @patch.object(settings.ShowCaptionsTabSetting, "apply")
+    @patch.object(settings.IncludePathTabSetting, "apply")
+    def test_run(
+        self,
+        mock_common_prefix_apply,
+        mock_group_caption_apply,
+        mock_captions_apply,
+        mock_include_path_apply
+    ) -> None:
+        """Tests the run method with a mocked set up."""
+        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
+            window: sublime.Window = sublime.active_window()
+            view: sublime.View = window.new_file()
+            view.set_scratch(True)
+
+            tabs: List[entities.Tab] = [entities.Tab(view)]
+            details: List[List[str]] = [tab.get_details() for tab in tabs]
+
+            mock_common_prefix_apply.return_value = tabs
+            mock_group_caption_apply.return_value = tabs
+            mock_captions_apply.return_value = tabs
+            mock_include_path_apply.return_value = tabs
+
+            cmd: TabFilterCommand = TabFilterCommand(window)
             cmd.run()
+
+            mock_common_prefix_apply.assert_called_once_with(tabs)
+            mock_group_caption_apply.assert_called_once_with(tabs)
+            mock_captions_apply.assert_called_once_with(tabs)
+            mock_include_path_apply.assert_called_once_with(tabs)
+
+            mock_panel.assert_called_once_with(details, cmd.on_done)
+
+    @patch.object(settings.CommonPrefixTabSetting, "apply")
+    @patch.object(settings.ShowGroupCaptionTabSetting, "apply")
+    @patch.object(settings.ShowCaptionsTabSetting, "apply")
+    @patch.object(settings.IncludePathTabSetting, "apply")
+    def test_run_with_no_files(
+        self,
+        mock_common_prefix_apply,
+        mock_group_caption_apply,
+        mock_captions_apply,
+        mock_include_path_apply
+    ) -> None:
+        """Tests the run method with a mocked set up and no files."""
+        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
+            window: sublime.Window = sublime.active_window()
+
+            tabs: List = []
+
+            mock_common_prefix_apply.return_value = tabs
+            mock_group_caption_apply.return_value = tabs
+            mock_captions_apply.return_value = tabs
+            mock_include_path_apply.return_value = tabs
+
+            cmd: TabFilterCommand = TabFilterCommand(window)
+            cmd.run()
+
+            mock_common_prefix_apply.assert_called_once_with(tabs)
+            mock_group_caption_apply.assert_called_once_with(tabs)
+            mock_captions_apply.assert_called_once_with(tabs)
+            mock_include_path_apply.assert_called_once_with(tabs)
 
             mock_panel.assert_called_once_with([], cmd.on_done)
 
-    def test_run_with_scratch_and_captions(self) -> None:
-        """Test running with a scratch buffer and captions enabled."""
+    def test_run_with_scratch_default_settings(self) -> None:
+        """Test running with a scratch buffer and default settings."""
         with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
             window: sublime.Window = sublime.active_window()
 
@@ -153,10 +271,11 @@ class TabFilterCommandTestCase(DeferrableTestCase):
                 "untitled",
                 "Current File, Unsaved File"
             ]
+
             mock_panel.assert_called_once_with([expected], cmd.on_done)
 
-    def test_run_with_file_and_captions(self) -> Generator[int, None, None]:
-        """Test running with a file and captions enabled."""
+    def test_run_with_file_default_settings(self) -> Generator[int, None, None]:
+        """Test running with a file and default settings."""
         dir: str = path.dirname(__file__)
 
         fixture: str = path.normpath(
@@ -181,35 +300,8 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             ]
             mock_panel.assert_called_once_with([expected], cmd.on_done)
 
-    def test_run_with_file_and_path(self) -> Generator[int, None, None]:
-        """Test running with a file and path enabled."""
-        self.settings.set("include_path", True)
-        dir: str = path.dirname(__file__)
-
-        fixture: str = path.normpath(
-            path.join(dir, "./fixtures/foo.txt")
-        )
-
-        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
-            window: sublime.Window = sublime.active_window()
-
-            window.open_file(fixture)
-
-            cmd: TabFilterCommand = TabFilterCommand(window)
-
-            sublime.set_timeout(lambda: cmd.run(), 100)
-
-            yield 100
-
-            expected: List[str] = [
-                "...{}foo.txt".format(path.sep),
-                "...{}foo.txt".format(path.sep),
-                "Current File"
-            ]
-            mock_panel.assert_called_once_with([expected], cmd.on_done)
-
-    def test_run_with_multiple_files(self) -> Generator[int, None, None]:
-        """Test running with multiple files."""
+    def test_run_with_active_group(self) -> Generator[int, None, None]:
+        """Test running with active group restriction & defaults."""
         dir: str = path.dirname(__file__)
 
         foo_fixture: str = path.normpath(
@@ -223,132 +315,43 @@ class TabFilterCommandTestCase(DeferrableTestCase):
         with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
             window: sublime.Window = sublime.active_window()
 
-            window.open_file(foo_fixture)
+            scratch_view: sublime.View = window.new_file()
+            foo_view: sublime.View = window.open_file(foo_fixture)
             bar_view: sublime.View = window.open_file(bar_fixture)
 
-            cmd: TabFilterCommand = TabFilterCommand(window)
+            # 2 column layout
+            layout: Dict[str, List] = {
+                "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+                "cols": [0.0, 0.5, 1.0],
+                "rows": [0.0, 1.0]
+            }
 
-            sublime.set_timeout(lambda: window.focus_view(bar_view), 100)
+            window.set_layout(layout)
+            window.set_view_index(foo_view, group=1, idx=0)
+            window.set_view_index(scratch_view, group=0, idx=0)
+            window.set_view_index(bar_view, group=0, idx=0)
 
             yield 100
 
-            cmd.run()
+            window.focus_view(bar_view)
+
+            cmd: TabFilterCommand = TabFilterCommand(window)
+            cmd.run(active_group_only=True)
 
             expected: List[List[str]] = [
-                [
-                    "foo.txt",
-                    "...{}foo.txt".format(path.sep),
-                ],
                 [
                     "bar.txt",
                     "...{}bar.txt".format(path.sep),
                     "Current File"
                 ],
-            ]
-            mock_panel.assert_called_once_with(expected, cmd.on_done)
-
-    def test_run_with_multiple_sources(self) -> Generator[int, None, None]:
-        """Test running with multiple sources (files & buffers)."""
-        dir: str = path.dirname(__file__)
-
-        foo_fixture: str = path.normpath(
-            path.join(dir, "./fixtures/foo.txt")
-        )
-
-        bar_fixture: str = path.normpath(
-            path.join(dir, "./fixtures/bar.txt")
-        )
-
-        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
-            window: sublime.Window = sublime.active_window()
-
-            window.new_file()
-            foo_view: sublime.View = window.open_file(foo_fixture)
-            window.open_file(bar_fixture)
-
-            cmd: TabFilterCommand = TabFilterCommand(window)
-
-            yield 100
-
-            window.focus_view(foo_view)
-
-            cmd.run()
-
-            expected: List[List[str]] = [
                 [
                     "untitled",
                     "untitled",
                     "Unsaved File"
                 ],
-                [
-                    "foo.txt",
-                    "...{}foo.txt".format(path.sep),
-                    "Current File"
-                ],
-                [
-                    "bar.txt",
-                    "...{}bar.txt".format(path.sep),
-                ],
             ]
+
             mock_panel.assert_called_once_with(expected, cmd.on_done)
-
-    def test_run_with_preview(self) -> Generator[int, None, None]:
-        """Test running with multiple sources (files & buffers)."""
-        self.settings.set("preview_tab", True)
-
-        dir: str = path.dirname(__file__)
-
-        foo_fixture: str = path.normpath(
-            path.join(dir, "./fixtures/foo.txt")
-        )
-
-        bar_fixture: str = path.normpath(
-            path.join(dir, "./fixtures/bar.txt")
-        )
-
-        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
-            window: sublime.Window = sublime.active_window()
-
-            window.new_file()
-            foo_view: sublime.View = window.open_file(foo_fixture)
-
-            window.open_file(bar_fixture)
-
-            cmd: TabFilterCommand = TabFilterCommand(window)
-
-            yield 100
-
-            window.focus_view(foo_view)
-
-            cmd.run()
-
-            expected: List[List[str]] = [
-                [
-                    "untitled",
-                    "untitled",
-                    "Unsaved File"
-                ],
-                [
-                    "foo.txt",
-                    "...{}foo.txt".format(path.sep),
-                    "Current File"
-                ],
-                [
-                    "bar.txt",
-                    "...{}bar.txt".format(path.sep),
-                ],
-            ]
-
-            # Foo is the "Current File" above, so should be set
-            # as our selected index.
-            expected_index: int = 1
-
-            mock_panel.assert_called_once_with(
-                expected,
-                cmd.on_done,
-                on_highlight=cmd.on_highlighted,
-                selected_index=expected_index
-            )
 
     def test_on_done_callback_with_valid_index(self) -> None:
         """Tests the on done callback works with valid selection."""
@@ -424,33 +427,3 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             # Also test values greatly outside the expected range.
             cmd.on_highlighted(100)
             mock_focus_view.assert_not_called()
-
-    def test_run_with_scratch_and_group_caption(self) -> None:
-        """Test running with a scratch buffer and group caption enabled."""
-        self.settings.set("show_group_caption", True)
-        self.settings.set("show_captions", False)
-        with patch.object(sublime.Window, "show_quick_panel") as mock_panel:
-            window: sublime.Window = sublime.active_window()
-
-            view: sublime.View = window.new_file()
-            view.set_scratch(True)
-
-            # 2 column layout
-            layout: Dict[str, List] = {
-                "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
-                "cols": [0.0, 0.5, 1.0],
-                "rows": [0.0, 1.0]
-            }
-
-            sublime.active_window().set_layout(layout)
-            sublime.active_window().set_view_index(view, group=0, idx=0)
-
-            cmd: TabFilterCommand = TabFilterCommand(window)
-            cmd.run()
-
-            expected: List[str] = [
-                "untitled",
-                "untitled",
-                "Group: 1"
-            ]
-            mock_panel.assert_called_once_with([expected], cmd.on_done)
