@@ -34,9 +34,16 @@ To install without git, download the source code as a zip file and extract the c
 
 ### Key Bindings
 
-Tab Filter comes with the following default keymap for Linux, OSX and Windows:  `alt+shift+p`
+Tab Filter comes with two built in commands:
 
-This can be overriden via the keybindings options in `Preferences > Package Settings > Tab Filter > Key Bindings - User`
+**Note:** All keybindings can be overriden via the keybindings options in `Preferences > Package Settings > Tab Filter > Key Bindings - User`
+
+#### Standard
+This command searches and filters across all open windows and groups, and has a default keymap on Linux, OSX and Windows of:  `alt+shift+p`
+
+#### Active Group
+This command searches and filters just within the active group when using a split layout in Sublime Text.  The default keymap for this command on Linux, OSX and Windows is:  `alt+shift+a`
+
 
 ### Command Palette
 
@@ -54,13 +61,13 @@ Tab Filter can be configured to show or hide additional captions relating to the
 
 By default, Tab Filter only shows the basename of open tabs (where they're really files and not just buffers, of course).  This configuration can be changed to instead show and therefore allow filtering by the full, non-common path of the file instead by changing the `include_path` option to `true`.
 
-##### Preview currently selected entry
+##### Preview Currently Selected Entry
 
 By default, Tab Filter only focuses the tab if it gets selected. To always focus/preview the currently highlighted entry, set `preview_tab` to `true`. **Note** that this currently only works with a single group layout (no split window).
 
 ##### Group Caption
 
-By default, Tab Filter only shows information about the filename being worked on, and optionally some meta information available via Path and Captions mentioned above. With this feature, for users who make heavy use of multi-pane layouts, you can now include an indicator of what group a tab belongs to, meaning you can easily see which pane a tab belongs in and differentiate between similarly named files open across different panes.  Two settings control this feature, set `show_group_caption` to `true` to enable the feature and use `group_caption` to control the caption itself - it defaults to `Group:` so that the caption would appear as `Group: 0`, `Group: 1`, etc, but will accept any string.  **Note:** Even if enabled, the feature will only display if there is more than one group, otherwise it's a fairly pointless caption to distract from the relevant information, since every group would be `Group: 0` anyhow.
+By default, Tab Filter only shows information about the filename being worked on, and optionally some meta information available via Path and Captions mentioned above. With this feature, for users who make heavy use of multi-pane layouts, you can now include an indicator of what group a tab belongs to, meaning you can easily see which pane a tab belongs in and differentiate between similarly named files open across different panes.  Set `show_group_caption` to `true` to enable the feature.  **Note:** Even if enabled, the feature will only display if there is more than one group, otherwise it's a fairly pointless caption to distract from the relevant information, since every group would be `Group: 1` anyhow.
 
 ## License
 

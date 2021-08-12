@@ -3,34 +3,25 @@
 
 import sublime  # type: ignore
 import sublime_plugin  # type: ignore
-from os import path
 from typing import List, Tuple
 from .lib.entities import Tab
 from .lib.settings import (
     TabSetting,
+    CommonPrefixTabSetting,
     ShowCaptionsTabSetting,
     IncludePathTabSetting,
     ShowGroupCaptionTabSetting,
 )
 
 
-class BaseTabFilterCommand(sublime_plugin.WindowCommand):
+class TabFilterCommand(sublime_plugin.WindowCommand):
     """Provides a GoToAnything style interface for
-        searching and selecting open tabs.
+       searching and selecting open tabs.
     """
     window: sublime.Window
     views: List[sublime.View] = []
-    prefix: int = 0
     current_tab_idx: int = -1
     settings: sublime.Settings
-
-    def __init__(self, *args, **kwargs):
-        """Initialises the tab filter instance and
-            calls the parent command initialiser.
-        """
-        super().__init__(*args, **kwargs)
-        self.views = []
-        self.settings = sublime.load_settings("tabfilter.sublime-settings")
 
     def gather_tabs(self, group_indexes: List[int]) -> List[Tab]:
         """Gather tabs from the given group indexes."""
@@ -47,32 +38,13 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
                 idx = idx + 1
         return tabs
 
-    def format_tabs(self, tabs: List[Tab]) -> List[List[str]]:
+    def format_tabs(
+        self,
+        tabs: List[Tab],
+        formatting_settings: Tuple[TabSetting, ...]
+    ) -> List[List[str]]:
         """Formats tabs for display in the quick info panel."""
-        tab_settings: Tuple[TabSetting, ...] = (
-            ShowCaptionsTabSetting(self.settings),
-            IncludePathTabSetting(self.settings),
-            ShowGroupCaptionTabSetting(self.settings),
-        )
-
-        common_prefix: str = path.commonprefix(
-            [
-                str(entity.get_path())
-                for entity in tabs
-                if entity.is_file_view()
-            ]
-        )
-
-        if path.isdir(common_prefix) is False:
-            common_prefix = common_prefix[:common_prefix.rfind(path.sep)]
-        self.prefix = len(common_prefix)
-
-        if self.prefix > 0:
-            for tab in tabs:
-                if tab.is_file_view():
-                    tab.set_subtitle(f"...{tab.get_subtitle()[self.prefix:]}")
-
-        for setting in tab_settings:
+        for setting in formatting_settings:
             tabs = setting.apply(tabs)
 
         return [entity.get_details() for entity in tabs]
@@ -107,41 +79,33 @@ class BaseTabFilterCommand(sublime_plugin.WindowCommand):
         if index > -1 and index < len(self.views):
             self.window.focus_view(self.views[index])
 
-
-class TabFilterCommand(BaseTabFilterCommand):
-    """Provides a GoToAnything style interface for searching
-        and selecting open tabs across all groups.
-    """
-
-    def run(self):
+    def run(self, active_group_only=False) -> None:
         """Shows a quick panel to filter and select tabs from
             the active window.
         """
-        tabs = self.gather_tabs(range(self.window.num_groups()))
+        self.views = []
+        self.settings = sublime.load_settings("tabfilter.sublime-settings")
+        
+        groups: List[int] = [self.window.active_group()]
 
-        preview: bool = (
-            self.settings.get("preview_tab") is True
-            and self.window.num_groups() == 1
+        if active_group_only is False:
+            groups = list(range(self.window.num_groups()))
+
+        tabs = self.gather_tabs(groups)
+
+        preview: bool = self.settings.get("preview_tab") is True
+
+        if active_group_only is False:
+            preview = preview and self.window.num_groups() == 1
+
+        formatting_settings: Tuple[TabSetting, ...] = (
+            CommonPrefixTabSetting(self.settings, self.window),
+            ShowGroupCaptionTabSetting(self.settings, self.window),
+            ShowCaptionsTabSetting(self.settings, self.window),
+            IncludePathTabSetting(self.settings, self.window),
         )
 
         self.display_quick_info_panel(
-            self.format_tabs(tabs),
+            self.format_tabs(tabs, formatting_settings),
             preview
-        )
-
-
-class TabFilterActiveGroupCommand(BaseTabFilterCommand):
-    """Provides a GoToAnything style interface for searching
-        and selecting open tabs within the active group.
-    """
-
-    def run(self):
-        """Shows a quick panel to filter and select tabs from
-            the active window.
-        """
-        tabs = self.gather_tabs([self.window.active_group()])
-
-        self.display_quick_info_panel(
-            self.format_tabs(tabs),
-            self.settings.get("preview_tab") is True
         )

@@ -4,8 +4,10 @@
         "command": "tab_filter"
     },
     {
-        
         "caption": "Tab Filter (Active Group)",
-        "command": "tab_filter_active_group"
+        "command": "tab_filter",
+        "args": {
+            "active_group_only": true,
+        }
     }
 ]

@@ -4,14 +4,14 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 from .entities import Tab
-from sublime import Settings, View  # type: ignore
+from sublime import Settings, View, Window  # type: ignore
+from os import path
 
 DEFAULT_SETINGS: Dict[str, Union[bool, str]] = {
     "show_captions": True,
     "include_path": False,
     "preview_tab": False,
     "show_group_caption": False,
-    "group_caption": "Group:"
 }
 
 
@@ -27,12 +27,14 @@ class TabSetting(Setting):
     """A setting relating to one or more tabs."""
 
     settings: Settings
+    window: Window
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, window: Window) -> None:
         """Initialise the setting instance with a copy
          of the sublime package settings.
          """
         self.settings = settings
+        self.window = window
 
     @abstractmethod
     def apply(self, tabs: List[Tab]) -> List[Tab]:
@@ -84,18 +86,49 @@ class IncludePathTabSetting(TabSetting):
 class ShowGroupCaptionTabSetting(TabSetting):
     """Setting for showing captions on tabs."""
     def is_enabled(self) -> bool:
-        return self.settings.get("show_group_caption") is True
+        return (
+            self.settings.get("show_group_caption") is True
+            and self.window.num_groups() > 1
+        )
 
     def apply(self, tabs: List[Tab]) -> List[Tab]:
         if self.is_enabled() is False:
             return tabs
-
-        prefix: str = self.settings.get("group_caption", "Group:")
 
         for tab in tabs:
             view: View = tab.get_view()
             # Group's are zero based, so lets add 1 one to the offset
             # to make them a bit more human friendly.
             group: int = view.sheet().group() + 1
-            tab.add_caption(f"{prefix} {group}")
+            tab.add_caption(f"Group: {group}")
+        return tabs
+
+
+class CommonPrefixTabSetting(TabSetting):
+    """Setting for truncating the common prefix on files."""
+    def is_enabled(self) -> bool:
+        # There's currently no support for opting out of this "setting".
+        return True
+
+    def apply(self, tabs: List[Tab]) -> List[Tab]:
+        if self.is_enabled() is False:
+            return tabs
+
+        prefix: int = 0
+        common_prefix: str = path.commonprefix(
+            [
+                tab.get_path()
+                for tab in tabs
+                if tab.is_file_view()
+            ]
+        )
+
+        if path.isdir(common_prefix) is False:
+            common_prefix = common_prefix[:common_prefix.rfind(path.sep)]
+        prefix = len(common_prefix)
+
+        if prefix > 0:
+            for tab in tabs:
+                if tab.is_file_view():
+                    tab.set_subtitle(f"...{tab.get_subtitle()[prefix:]}")
         return tabs

@@ -5,6 +5,9 @@
     },
     {
         "keys": ["shift+alt+a"],
-        "command": "tab_filter_active_group" 
+        "command": "tab_filter",
+        "args": {
+            "active_group_only": true,
+        }
     }
 ]

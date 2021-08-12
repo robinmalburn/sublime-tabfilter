@@ -8,13 +8,14 @@ from unittest.mock import patch
 from typing import List, Dict, Generator
 try:
     import tabfilter
-    from lib import settings
+    from lib import settings, entities
 except ImportError:
     # If we're running these tests in UnitTesting, then we need to use
     # The package name - Tab Filter - so let's grab import lib and try again.
     from importlib import import_module
     tabfilter = import_module(".tabfilter", "Tab Filter")
     settings = import_module(".lib.settings", "Tab Filter")
+    entities = import_module(".lib.entities", "Tab Filter")
 
 TabFilterCommand = tabfilter.TabFilterCommand
 
@@ -25,9 +26,11 @@ class TabFilterCommandTestCase(DeferrableTestCase):
     """Tests the tab filter command works as expected."""
 
     settings: sublime.Settings
+    layout: Dict[str, List]
 
     def setUp(self) -> None:
         self.settings = sublime.load_settings("tabfilter.sublime-settings")
+        self.layout = sublime.active_window().layout()
         for setting in DEFAULT_SETINGS:
             self.settings.set(setting, DEFAULT_SETINGS[setting])
 
@@ -37,10 +40,92 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             view.window().run_command("close_file")
 
     def tearDown(self) -> None:
+        # Restore the original layout
+        sublime.active_window().set_layout(self.layout)
+
         for view in sublime.active_window().views():
             view.window().focus_view(view)
             view.set_scratch(True)
             view.window().run_command("close_file")
+
+    def test_gather_tabs_no_files(self) -> None:
+        """Tests gathering tabs when there are no files."""
+        window: sublime.Window = sublime.active_window()
+        groups: List[int] = list(range(window.num_groups()))
+        cmd: TabFilterCommand = TabFilterCommand(window)
+
+        self.assertListEqual(
+            [],
+            cmd.gather_tabs(groups)
+        )
+
+    def test_gather_tabs_single_group(self) -> None:
+        """Tests gathering tabs from a single group layout."""
+        window: sublime.Window = sublime.active_window()
+        view: sublime.View = window.new_file()
+        view.set_scratch(True)
+        groups: List[int] = list(range(window.num_groups()))
+
+        cmd: TabFilterCommand = TabFilterCommand(window)
+
+        self.assertListEqual(
+            [entities.Tab(view)],
+            cmd.gather_tabs(groups)
+        )
+
+    def test_gather_tabs_multiple_groups(self) -> None:
+        """Tests gathering tabs from a multi-group layout."""
+        window: sublime.Window = sublime.active_window()
+        view: sublime.View = window.new_file()
+        view.set_scratch(True)
+        second_view: sublime.View = window.new_file()
+        second_view.set_scratch(True)
+
+        # 2 column layout
+        layout: Dict[str, List] = {
+            "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+            "cols": [0.0, 0.5, 1.0],
+            "rows": [0.0, 1.0]
+        }
+
+        sublime.active_window().set_layout(layout)
+        sublime.active_window().set_view_index(second_view, group=1, idx=0)
+
+        cmd: TabFilterCommand = TabFilterCommand(window)
+
+        groups: List[int] = list(range(window.num_groups()))
+
+        self.assertListEqual(
+            [entities.Tab(view), entities.Tab(second_view)],
+            cmd.gather_tabs(groups)
+        )
+
+    def test_gather_tabs_selected_group(self) -> None:
+        """Tests gathering tabs from the selected layout."""
+        window: sublime.Window = sublime.active_window()
+        view: sublime.View = window.new_file()
+        view.set_scratch(True)
+        second_view: sublime.View = window.new_file()
+        second_view.set_scratch(True)
+
+        # 2 column layout
+        layout: Dict[str, List] = {
+            "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+            "cols": [0.0, 0.5, 1.0],
+            "rows": [0.0, 1.0]
+        }
+
+        sublime.active_window().set_layout(layout)
+        sublime.active_window().set_view_index(second_view, group=1, idx=0)
+
+        cmd: TabFilterCommand = TabFilterCommand(window)
+
+        groups: List[int] = [second_view.sheet().group()]
+
+        self.assertListEqual(
+            [entities.Tab(second_view)],
+            cmd.gather_tabs(groups)
+        )
 
     def test_run_with_no_files(self) -> None:
         """Tests running with a single file."""
@@ -350,14 +435,15 @@ class TabFilterCommandTestCase(DeferrableTestCase):
             view: sublime.View = window.new_file()
             view.set_scratch(True)
 
-            # single column layout
+            # 2 column layout
             layout: Dict[str, List] = {
-                "cells": [[0, 0, 1, 1]],
-                "cols": [0.0, 1.0],
+                "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+                "cols": [0.0, 0.5, 1.0],
                 "rows": [0.0, 1.0]
             }
 
             sublime.active_window().set_layout(layout)
+            sublime.active_window().set_view_index(view, group=0, idx=0)
 
             cmd: TabFilterCommand = TabFilterCommand(window)
             cmd.run()
