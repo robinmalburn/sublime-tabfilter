@@ -10,9 +10,9 @@ class Tab(object):
     """Represent a Sublime tab and the relevant metadata."""
     view: View
     title: str = "untitled"
-    subtitle: str = "untitle"
+    subtitle: str = "untitled"
     is_file: bool = True
-    path: Optional[str] = None
+    path: Optional[str] = ""
     captions: List[str] = []
 
     def __init__(self, view: View) -> None:
@@ -59,7 +59,7 @@ class Tab(object):
         """Gets whether the tab's view is a file or not."""
         return self.is_file
 
-    def get_path(self) -> Optional[str]:
+    def get_path(self) -> str:
         """Gets the path for a view tab, or None otherwise."""
         return self.path
 
@@ -85,3 +85,17 @@ class Tab(object):
             details.append(", ".join(captions))
 
         return details
+
+    def __eq__(self, obj) -> bool:
+        """Ensures two tabs refer to the same underlying view and data."""
+        if isinstance(obj, type(self)) is False:
+            return False
+        return (
+            self.get_view() == obj.get_view()
+            and self.get_captions() == obj.get_captions()
+            and self.get_title() == obj.get_title()
+            and self.get_subtitle() == obj.get_subtitle()
+        )
+
+    def __str__(self) -> str:
+        return self.get_title()

@@ -42,7 +42,7 @@ class TabTestCase(TestCase):
         file_view: sublime.View = sublime.active_window().open_file(fixture)
 
         dataset: Tuple[Tuple[sublime.View, str, bool, Optional[str]], ...] = (
-            (scratch_view, "untitled", False, None),
+            (scratch_view, "untitled", False, ""),
             (file_view, path.basename(fixture), True, path.dirname(fixture))
         )
 
@@ -119,7 +119,7 @@ class TabTestCase(TestCase):
 
         entity: Tab = Tab(scratch_view)
 
-        self.assertEquals(None, entity.get_path())
+        self.assertEquals("", entity.get_path())
 
         dir: str = path.dirname(__file__)
 
@@ -206,3 +206,25 @@ class TabTestCase(TestCase):
         details = entity.get_details()
 
         self.assertListEqual(["untitled", "untitled", "bar, baz"], details)
+
+    def test_equality_check(self) -> None:
+        """Tests comparing two tabs for equality."""
+        scratch_view: sublime.View = sublime.active_window().new_file()
+
+        t1: Tab = Tab(scratch_view)
+        t2: Tab = Tab(scratch_view)
+
+        self.assertEquals(t1, t2)
+
+        t3: Tab = Tab(scratch_view)
+        t3.add_caption("Force a difference")
+
+        self.assertNotEqual(t1, t3)
+
+    def test_to_string(self) -> None:
+        """Tests representing a tab as a string"""
+        scratch_view: sublime.View = sublime.active_window().new_file()
+
+        entity: Tab = Tab(scratch_view)
+
+        self.assertEquals(entity.get_title(), str(entity))
