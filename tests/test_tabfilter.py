@@ -89,6 +89,7 @@ class TabFilterCommandTestCase(DeferrableTestCase):
         }
 
         sublime.active_window().set_layout(layout)
+        sublime.active_window().set_view_index(view, group=0, idx=0)
         sublime.active_window().set_view_index(second_view, group=1, idx=0)
 
         cmd: TabFilterCommand = TabFilterCommand(window)
