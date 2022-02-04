@@ -16,3 +16,5 @@ jobs:
         with:
           sublime-text-version: ${{ matrix.st-version }}
       - uses: SublimeText/UnitTesting/actions/run-tests@v1
+        with:
+          package-name: "Tab Filter"
