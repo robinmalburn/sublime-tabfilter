@@ -1,4 +1,6 @@
 # Tab Filter
+![Tests](https://github.com/robinmalburn/sublime-tabfilter/actions/workflows/tests.yml/badge.svg?branch=master&event=push)
+
 
 Tab Filter is a Sublime Text plugin for quickly switching between open tabs.  Invoking Tab Filter brings up a "GoTo Anything"-like quick input showing your opened tabs for the current window, allowing you to quick filter on file names to rapidly switch amongst existing tabs.
 
